@@ -1,0 +1,276 @@
+{
+  "info": {
+    "_postman_id": "42efa070-c9ae-4994-9c2d-9f4c4745f887",
+    "name": "AI Platform API Test Suite",
+    "description": "Test suite validating API behaviour for an AI property management platform integration. Covers authentication, error handling, boundary testing, and data type validation. Built to demonstrate Solution Consultant pre-deployment validation skills.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54577490",
+    "_collection_link": "https://go.postman.co/collection/54577490-42efa070-c9ae-4994-9c2d-9f4c4745f887?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "POST - Valid chat message",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status is 200\", function() {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Response time under 30 seconds\", function() {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(30000);\r",
+              "});\r",
+              "pm.test(\"Response contains AI message\", function() {\r",
+              "    const json = pm.response.json();\r",
+              "    pm.expect(json).to.have.property('choices');\r",
+              "    pm.expect(json.choices[0]).to.have.property('message');\r",
+              "    pm.expect(json.choices[0].message).to.have.property('content');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{hf_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"model\": \"meta-llama/Llama-3.2-3B-Instruct:cerebras\",\r\n  \"messages\": [\r\n    {\r\n      \"role\": \"user\",\r\n      \"content\": \"My kitchen tap is leaking. Can you log a maintenance request?\"\r\n    }\r\n  ],\r\n  \"max_tokens\": 100\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://router.huggingface.co/v1/chat/completions",
+          "protocol": "https",
+          "host": [
+            "router",
+            "huggingface",
+            "co"
+          ],
+          "path": [
+            "v1",
+            "chat",
+            "completions"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST - Empty message body",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "POST - Invalid API key",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "POST - No API Key",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Returns auth error without API key\", function() {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"model\": \"meta-llama/Llama-3.1-8B-Instruct:novita\",\r\n  \"messages\": [\r\n    {\r\n      \"role\": \"user\",\r\n      \"content\": \"Test request with no auth header\"\r\n    }\r\n  ],\r\n  \"max_tokens\": 50\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://router.huggingface.co/v1/chat/completions",
+          "protocol": "https",
+          "host": [
+            "router",
+            "huggingface",
+            "co"
+          ],
+          "path": [
+            "v1",
+            "chat",
+            "completions"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST - Boundary test (long message)",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "POST - Wrong data type (number instead of string)",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Model info (valid key)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status is 200\", function() {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Returns model metadata\", function() {\r",
+              "    const json = pm.response.json();\r",
+              "    pm.expect(json).to.have.property('id');\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{hf_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "https://huggingface.co/api/models/meta-llama/Llama-3.1-8B-Instruct",
+          "protocol": "https",
+          "host": [
+            "huggingface",
+            "co"
+          ],
+          "path": [
+            "api",
+            "models",
+            "meta-llama",
+            "Llama-3.1-8B-Instruct"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST - Invalid model endpoint",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Returns error for non-existent model\", function() {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([400, 404, 422]);\r",
+              "});\r",
+              "pm.test(\"Error response is informative\", function() {\r",
+              "    pm.expect(pm.response.text()).to.not.be.empty;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{hf_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"model\": \"this-model-does-not-exist-12345:novita\",\r\n  \"messages\": [\r\n    {\r\n      \"role\": \"user\",\r\n      \"content\": \"Test request to non-existent model\"\r\n    }\r\n  ],\r\n  \"max_tokens\": 50\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://router.huggingface.co/v1/chat/completions",
+          "protocol": "https",
+          "host": [
+            "router",
+            "huggingface",
+            "co"
+          ],
+          "path": [
+            "v1",
+            "chat",
+            "completions"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
